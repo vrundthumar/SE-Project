@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GTMS — Goods Transport Management System</title>
+
+  <!-- Lucide Icon Library -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Master Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ==========================================================================
+       1. LOGIN VIEW (SPLIT-SCREEN HERO DESIGN)
+       ========================================================================== -->
+  <div id="login-view" class="login-wrapper">
+    <!-- Left Hero Section -->
+    <div class="login-left">
+      <div class="login-brand">
+        <div class="brand-icon-box">
+          <i data-lucide="truck"></i>
+        </div>
+        <div>
+          <div class="brand-name">GTMS</div>
+          <div class="brand-sub">Goods Transport</div>
+        </div>
+      </div>
+
+      <div class="login-hero-content">
+        <h1 class="login-hero-title">Move Goods.<br>Manage Smarter.</h1>
+        <p class="login-hero-desc">A simple, powerful, and modern transport management system for registering vehicles, managing drivers, and assigning transportation trips.</p>
+
+        <div class="login-features-grid">
+          <div class="feature-pill">
+            <h4><i data-lucide="shield-check" style="width:18px;height:18px;"></i> Fleet Control</h4>
+            <p>Track capacity and vehicle availability in real time.</p>
+          </div>
+          <div class="feature-pill">
+            <h4><i data-lucide="users" style="width:18px;height:18px;"></i> Driver Roster</h4>
+            <p>Manage licensed drivers and vehicle assignments.</p>
+          </div>
+          <div class="feature-pill">
+            <h4><i data-lucide="route" style="width:18px;height:18px;"></i> Trip Dispatch</h4>
+            <p>Assign routes, goods cargo, and track transit dates.</p>
+          </div>
+          <div class="feature-pill">
+            <h4><i data-lucide="activity" style="width:18px;height:18px;"></i> Dynamic Sync</h4>
+            <p>Automatic status synchronization across all fleet units.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="login-left-footer">
+        GTMS — Goods Transport Management System &copy; 2026. Frontend-Only Architecture.
+      </div>
+    </div>
+
+    <!-- Right Login Form -->
+    <div class="login-right">
+      <div class="login-card">
+        <div class="login-header">
+          <h2>Welcome back</h2>
+          <p>Sign in to manage your transport operations.</p>
+        </div>
+
+        <!-- Demo Access Credentials Box -->
+        <!-- <div class="demo-credentials-box">
+          <div class="demo-cred-info">
+            <strong>Demo Access:</strong> Username: <code>owner</code> | Password: <code>owner123</code>
+          </div>
+          <button type="button" class="btn-fill-demo" onclick="fillDemoCredentials()">Auto-fill</button>
+        </div> -->
+
+        <form id="login-form">
+          <div class="form-group">
+            <label class="form-label" for="login-username">Username</label>
+            <input type="text" id="login-username" class="form-control" placeholder="Enter username" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="login-password">Password</label>
+            <div class="password-input-group">
+              <input type="password" id="login-password" class="form-control" placeholder="Enter password" required>
+              <button type="button" id="btn-toggle-pwd" class="btn-toggle-pwd" title="Toggle Password Visibility">
+                <i data-lucide="eye"></i>
+              </button>
+            </div>
+            <span id="login-error" class="form-error"></span>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full">
+            <i data-lucide="log-in"></i> Sign In
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       2. MAIN APP LAYOUT (SIDEBAR + TOPBAR + CONTENT VIEWS)
+       ========================================================================== -->
+  <div id="app-layout" class="app-layout hidden">
+    
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-icon-box">
+          <i data-lucide="truck"></i>
+        </div>
+        <div>
+          <div class="sidebar-brand-name">GTMS</div>
+          <div class="sidebar-sub">Goods Transport</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Overview</div>
+        <a href="#" class="nav-link active" data-view="dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <div class="nav-section-label">Management</div>
+        <a href="#" class="nav-link" data-view="vehicles">
+          <i data-lucide="truck"></i>
+          <span>Vehicles</span>
+        </a>
+        <a href="#" class="nav-link" data-view="drivers">
+          <i data-lucide="users"></i>
+          <span>Drivers</span>
+        </a>
+        <a href="#" class="nav-link" data-view="trips">
+          <i data-lucide="route"></i>
+          <span>Trips</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="nav-link btn-full" style="background:none;border:none;cursor:pointer;" onclick="UI.triggerLogoutModal()">
+          <i data-lucide="log-out"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+      
+      <!-- Top Navigation Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="btn-mobile-toggle" onclick="UI.toggleMobileSidebar()">
+            <i data-lucide="menu"></i>
+          </button>
+          <div class="topbar-title-area">
+            <h1 id="topbar-page-title">Dashboard</h1>
+            <p id="topbar-page-sub">Overview of your transport operations</p>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Theme Toggle -->
+          <button id="btn-theme-toggle" class="btn-topbar-action" title="Toggle Light/Dark Theme">
+            <i data-lucide="moon"></i>
+          </button>
+
+          <!-- Notification Bell -->
+          <div style="position:relative;">
+            <button id="btn-notifications" class="btn-topbar-action" title="Notifications">
+              <i data-lucide="bell"></i>
+              <span id="notif-badge" class="notification-badge hidden">0</span>
+            </button>
+
+            <!-- Notifications Dropdown -->
+            <div id="notification-dropdown-menu" class="dropdown-menu notification-menu hidden">
+              <div class="dropdown-header" style="display:flex;justify-content:space-between;align-items:center;">
+                <strong>Notifications</strong>
+                <button class="btn-link" style="font-size:0.75rem;" onclick="UI.markAllNotifsRead()">Mark read</button>
+              </div>
+              <div id="notification-list-container" class="notification-list">
+                <!-- Dynamic Items -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Owner Profile Dropdown -->
+          <div class="profile-dropdown-wrapper">
+            <button id="btn-profile" class="btn-profile-trigger">
+              <div class="avatar-circle">O</div>
+              <div class="profile-meta">
+                <div class="profile-name">Owner</div>
+                <div class="profile-role">Administrator</div>
+              </div>
+              <i data-lucide="chevron-down" style="width:16px;height:16px;color:var(--text-muted);"></i>
+            </button>
+
+            <div id="profile-dropdown-menu" class="dropdown-menu hidden">
+              <div class="dropdown-header">
+                <strong>Owner Account</strong>
+                <span>Administrator</span>
+              </div>
+              <button class="dropdown-item" onclick="UI.triggerResetDemoModal()">
+                <i data-lucide="rotate-ccw" style="width:16px;height:16px;"></i> Reset Demo Data
+              </button>
+              <button class="dropdown-item danger-item" onclick="UI.triggerLogoutModal()">
+                <i data-lucide="log-out" style="width:16px;height:16px;"></i> Logout
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <main class="content-area">
+
+        <!-- ==================================================================
+             VIEW 1: DASHBOARD
+             ================================================================== -->
+        <div id="view-dashboard" class="page-view">
+          
+          <!-- Hero Welcome Banner -->
+          <div class="dashboard-welcome-banner">
+            <div class="welcome-text">
+              <h2 id="dashboard-greeting">Good morning, Owner</h2>
+              <p>Transport operations, simplified. Manage your fleet, drivers, and dispatch trips efficiently.</p>
+            </div>
+            <button class="btn btn-primary" onclick="Trips.openAssignModal()">
+              <i data-lucide="plus-circle"></i> Assign New Trip
+            </button>
+          </div>
+
+          <!-- 4 Statistic Cards Grid -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-info">
+                <div class="stat-label">Total Vehicles</div>
+                <div id="stat-total-vehicles" class="stat-value">0</div>
+                <div id="stat-total-vehicles-sub" class="stat-sub">0 available</div>
+              </div>
+              <div class="stat-icon-wrapper stat-icon-blue">
+                <i data-lucide="truck"></i>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-info">
+                <div class="stat-label">Total Drivers</div>
+                <div id="stat-total-drivers" class="stat-value">0</div>
+                <div id="stat-total-drivers-sub" class="stat-sub">0 available</div>
+              </div>
+              <div class="stat-icon-wrapper stat-icon-green">
+                <i data-lucide="users"></i>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-info">
+                <div class="stat-label">Total Trips</div>
+                <div id="stat-total-trips" class="stat-value">0</div>
+                <div id="stat-total-trips-sub" class="stat-sub">0 scheduled</div>
+              </div>
+              <div class="stat-icon-wrapper stat-icon-purple">
+                <i data-lucide="route"></i>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-info">
+                <div class="stat-label">Active Trips</div>
+                <div id="stat-active-trips" class="stat-value">0</div>
+                <div class="stat-sub">Currently in transit</div>
+              </div>
+              <div class="stat-icon-wrapper stat-icon-teal">
+                <i data-lucide="navigation"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dashboard 2-Column Section -->
+          <div class="dashboard-grid-2col">
+            <!-- Left Column: Quick Actions & Recent Trips -->
+            <div>
+              <!-- Quick Actions -->
+              <div class="card-panel">
+                <div class="panel-header">
+                  <h3 class="panel-title"><i data-lucide="zap"></i> Quick Actions</h3>
+                </div>
+                <div class="quick-actions-grid">
+                  <div class="action-card" onclick="Vehicles.openRegisterModal()">
+                    <div class="action-icon"><i data-lucide="truck"></i></div>
+                    <h4>Register Vehicle</h4>
+                    <p>Add a new vehicle to fleet.</p>
+                  </div>
+                  <div class="action-card" onclick="Drivers.openRegisterModal()">
+                    <div class="action-icon" style="background:#16A34A;"><i data-lucide="user-plus"></i></div>
+                    <h4>Register Driver</h4>
+                    <p>Add a new driver record.</p>
+                  </div>
+                  <div class="action-card" onclick="Trips.openAssignModal()">
+                    <div class="action-icon" style="background:#9333EA;"><i data-lucide="plus-circle"></i></div>
+                    <h4>Assign Trip</h4>
+                    <p>Dispatch vehicle & driver.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Recent Trips Table -->
+              <div class="card-panel">
+                <div class="panel-header">
+                  <h3 class="panel-title"><i data-lucide="clock"></i> Recent Trips</h3>
+                  <button class="btn-link" onclick="UI.switchView('trips')">View All Trips &rarr;</button>
+                </div>
+                <div class="table-responsive" style="border:none;">
+                  <table class="gtms-table">
+                    <thead>
+                      <tr>
+                        <th>Trip ID</th>
+                        <th>Route</th>
+                        <th>Goods</th>
+                        <th>Vehicle</th>
+                        <th>Driver</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="recent-trips-tbody">
+                      <!-- Dynamic Rows -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Vehicle Availability & Recent Activity -->
+            <div>
+              <!-- Vehicle Availability -->
+              <div class="card-panel">
+                <div class="panel-header">
+                  <h3 class="panel-title"><i data-lucide="pie-chart"></i> Vehicle Availability</h3>
+                </div>
+                
+                <div class="availability-bar-wrapper">
+                  <div class="availability-bar">
+                    <div id="bar-avail" class="bar-segment bar-available" style="width: 40%;"></div>
+                    <div id="bar-ontrip" class="bar-segment bar-ontrip" style="width: 40%;"></div>
+                    <div id="bar-maint" class="bar-segment bar-maintenance" style="width: 20%;"></div>
+                  </div>
+                </div>
+
+                <div class="availability-legend">
+                  <div class="legend-item">
+                    <div class="legend-info">
+                      <span class="dot-indicator" style="background:#16A34A;"></span> Available
+                    </div>
+                    <span id="count-avail" class="legend-count">0</span>
+                  </div>
+                  <div class="legend-item">
+                    <div class="legend-info">
+                      <span class="dot-indicator" style="background:#2563EB;"></span> On Trip
+                    </div>
+                    <span id="count-ontrip" class="legend-count">0</span>
+                  </div>
+                  <div class="legend-item">
+                    <div class="legend-info">
+                      <span class="dot-indicator" style="background:#D97706;"></span> Maintenance
+                    </div>
+                    <span id="count-maint" class="legend-count">0</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Recent Activity -->
+              <div class="card-panel">
+                <div class="panel-header">
+                  <h3 class="panel-title"><i data-lucide="activity"></i> Recent Activity</h3>
+                </div>
+                <div id="recent-activity-container" class="activity-stream">
+                  <!-- Dynamic Activity Stream -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- ==================================================================
+             VIEW 2: VEHICLES
+             ================================================================== -->
+        <div id="view-vehicles" class="page-view hidden">
+          <div class="page-header-action">
+            <div>
+              <h2>Vehicles</h2>
+              <p class="text-muted">Manage all vehicles in your transport fleet.</p>
+            </div>
+            <button class="btn btn-primary" onclick="Vehicles.openRegisterModal()">
+              <i data-lucide="plus"></i> Register Vehicle
+            </button>
+          </div>
+
+          <!-- Toolbar Search & Filter -->
+          <div class="toolbar-panel">
+            <div class="search-box">
+              <i data-lucide="search"></i>
+              <input type="text" id="vehicle-search" class="form-control" placeholder="Search vehicles by number, type, driver...">
+            </div>
+            <div class="filter-group">
+              <select id="vehicle-status-filter" class="form-control" style="width: auto;">
+                <option value="All">All Statuses</option>
+                <option value="Available">Available</option>
+                <option value="On Trip">On Trip</option>
+                <option value="Maintenance">Maintenance</option>
+              </select>
+              <select id="vehicle-type-filter" class="form-control" style="width: auto;">
+                <option value="All">All Types</option>
+                <option value="Truck">Truck</option>
+                <option value="Mini Truck">Mini Truck</option>
+                <option value="Pickup">Pickup</option>
+                <option value="Heavy Truck">Heavy Truck</option>
+              </select>
+              <button class="btn btn-secondary btn-sm" onclick="UI.clearVehicleFilters()">Clear Filters</button>
+            </div>
+          </div>
+
+          <!-- Desktop Table -->
+          <div class="table-responsive">
+            <table class="gtms-table">
+              <thead>
+                <tr>
+                  <th>Vehicle Number</th>
+                  <th>Vehicle Type</th>
+                  <th>Capacity</th>
+                  <th>Assigned Driver</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="vehicles-table-body">
+                <!-- Dynamic Rows -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Mobile Cards Container -->
+          <div id="vehicles-mobile-cards" class="mobile-cards-container">
+            <!-- Dynamic Mobile Cards -->
+          </div>
+
+          <!-- Empty State -->
+          <div id="vehicles-empty-state" class="empty-state hidden">
+            <div class="empty-icon-box"><i data-lucide="truck" style="width:32px;height:32px;"></i></div>
+            <h3>No vehicles found</h3>
+            <p>Register a new vehicle or adjust your search filters.</p>
+            <button class="btn btn-primary" onclick="Vehicles.openRegisterModal()">+ Register Vehicle</button>
+          </div>
+        </div>
+
+        <!-- ==================================================================
+             VIEW 3: DRIVERS
+             ================================================================== -->
+        <div id="view-drivers" class="page-view hidden">
+          <div class="page-header-action">
+            <div>
+              <h2>Drivers</h2>
+              <p class="text-muted">Manage your drivers and their availability.</p>
+            </div>
+            <button class="btn btn-primary" onclick="Drivers.openRegisterModal()">
+              <i data-lucide="user-plus"></i> Register Driver
+            </button>
+          </div>
+
+          <!-- Toolbar Search & Filter -->
+          <div class="toolbar-panel">
+            <div class="search-box">
+              <i data-lucide="search"></i>
+              <input type="text" id="driver-search" class="form-control" placeholder="Search drivers by name, phone, license...">
+            </div>
+            <div class="filter-group">
+              <select id="driver-status-filter" class="form-control" style="width: auto;">
+                <option value="All">All Statuses</option>
+                <option value="Available">Available</option>
+                <option value="On Trip">On Trip</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+              <button class="btn btn-secondary btn-sm" onclick="UI.clearDriverFilters()">Clear Filters</button>
+            </div>
+          </div>
+
+          <!-- Desktop Table -->
+          <div class="table-responsive">
+            <table class="gtms-table">
+              <thead>
+                <tr>
+                  <th>Driver Name</th>
+                  <th>Phone Number</th>
+                  <th>License Number</th>
+                  <th>Assigned Vehicle</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="drivers-table-body">
+                <!-- Dynamic Rows -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Mobile Cards Container -->
+          <div id="drivers-mobile-cards" class="mobile-cards-container">
+            <!-- Dynamic Mobile Cards -->
+          </div>
+
+          <!-- Empty State -->
+          <div id="drivers-empty-state" class="empty-state hidden">
+            <div class="empty-icon-box"><i data-lucide="users" style="width:32px;height:32px;"></i></div>
+            <h3>No drivers found</h3>
+            <p>Register your first driver or clear search filters.</p>
+            <button class="btn btn-primary" onclick="Drivers.openRegisterModal()">+ Register Driver</button>
+          </div>
+        </div>
+
+        <!-- ==================================================================
+             VIEW 4: TRIPS
+             ================================================================== -->
+        <div id="view-trips" class="page-view hidden">
+          <div class="page-header-action">
+            <div>
+              <h2>Trips</h2>
+              <p class="text-muted">Plan, assign and monitor goods transportation trips.</p>
+            </div>
+            <button class="btn btn-primary" onclick="Trips.openAssignModal()">
+              <i data-lucide="plus-circle"></i> Assign New Trip
+            </button>
+          </div>
+
+          <!-- Toolbar Search & Filter -->
+          <div class="toolbar-panel">
+            <div class="search-box">
+              <i data-lucide="search"></i>
+              <input type="text" id="trip-search" class="form-control" placeholder="Search trips by ID, route, goods, vehicle, driver...">
+            </div>
+            <div class="filter-group">
+              <select id="trip-status-filter" class="form-control" style="width: auto;">
+                <option value="All">All Statuses</option>
+                <option value="Scheduled">Scheduled</option>
+                <option value="In Transit">In Transit</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+              <button class="btn btn-secondary btn-sm" onclick="UI.clearTripFilters()">Clear Filters</button>
+            </div>
+          </div>
+
+          <!-- Desktop Table -->
+          <div class="table-responsive">
+            <table class="gtms-table">
+              <thead>
+                <tr>
+                  <th>Trip ID</th>
+                  <th>Route</th>
+                  <th>Goods</th>
+                  <th>Vehicle</th>
+                  <th>Driver</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="trips-table-body">
+                <!-- Dynamic Rows -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Mobile Cards Container -->
+          <div id="trips-mobile-cards" class="mobile-cards-container">
+            <!-- Dynamic Mobile Cards -->
+          </div>
+
+          <!-- Empty State -->
+          <div id="trips-empty-state" class="empty-state hidden">
+            <div class="empty-icon-box"><i data-lucide="route" style="width:32px;height:32px;"></i></div>
+            <h3>No trips found</h3>
+            <p>Assign a new trip to start dispatching your transport fleet.</p>
+            <button class="btn btn-primary" onclick="Trips.openAssignModal()">+ Assign New Trip</button>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       3. MODAL DIALOGS
+       ========================================================================== -->
+
+  <!-- Vehicle Modal (Register & Edit) -->
+  <div id="vehicle-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <h3 id="vehicle-modal-title">Register Vehicle</h3>
+          <p id="vehicle-modal-subtitle">Add a new vehicle to your fleet.</p>
+        </div>
+        <button class="btn-close-modal" onclick="UI.closeModal('vehicle-modal')"><i data-lucide="x"></i></button>
+      </div>
+      <form id="vehicle-form">
+        <div class="modal-body">
+          <input type="hidden" id="vehicle-id-input">
+          
+          <div class="form-group">
+            <label class="form-label" for="vehicle-number-input">Vehicle Number</label>
+            <input type="text" id="vehicle-number-input" class="form-control" placeholder="GJ03 AB 1234" required>
+          </div>
+
+          <div class="form-row-2col">
+            <div class="form-group">
+              <label class="form-label" for="vehicle-type-select">Vehicle Type</label>
+              <select id="vehicle-type-select" class="form-control" required>
+                <option value="">Select Type</option>
+                <option value="Truck">Truck</option>
+                <option value="Mini Truck">Mini Truck</option>
+                <option value="Pickup">Pickup</option>
+                <option value="Heavy Truck">Heavy Truck</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="vehicle-capacity-select">Capacity</label>
+              <select id="vehicle-capacity-select" class="form-control" required>
+                <option value="">Select Capacity</option>
+                <option value="1 Ton">1 Ton</option>
+                <option value="2 Ton">2 Ton</option>
+                <option value="5 Ton">5 Ton</option>
+                <option value="8 Ton">8 Ton</option>
+                <option value="10 Ton">10 Ton</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row-2col">
+            <div class="form-group">
+              <label class="form-label" for="vehicle-driver-select">Assigned Driver</label>
+              <select id="vehicle-driver-select" class="form-control">
+                <option value="">Unassigned</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="vehicle-status-select">Status</label>
+              <select id="vehicle-status-select" class="form-control" required>
+                <option value="Available">Available</option>
+                <option value="On Trip">On Trip</option>
+                <option value="Maintenance">Maintenance</option>
+              </select>
+            </div>
+          </div>
+
+          <span id="vehicle-form-error" class="form-error"></span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('vehicle-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Vehicle</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Driver Modal (Register & Edit) -->
+  <div id="driver-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <h3 id="driver-modal-title">Register Driver</h3>
+          <p id="driver-modal-subtitle">Add a new driver to your team.</p>
+        </div>
+        <button class="btn-close-modal" onclick="UI.closeModal('driver-modal')"><i data-lucide="x"></i></button>
+      </div>
+      <form id="driver-form">
+        <div class="modal-body">
+          <input type="hidden" id="driver-id-input">
+
+          <div class="form-group">
+            <label class="form-label" for="driver-name-input">Driver Full Name</label>
+            <input type="text" id="driver-name-input" class="form-control" placeholder="Enter driver name" required>
+          </div>
+
+          <div class="form-row-2col">
+            <div class="form-group">
+              <label class="form-label" for="driver-phone-input">Mobile Number</label>
+              <input type="tel" id="driver-phone-input" class="form-control" placeholder="9876543210" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="driver-license-input">Driving License Number</label>
+              <input type="text" id="driver-license-input" class="form-control" placeholder="DL-GJ-123456" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="driver-address-input">Residential Address</label>
+            <textarea id="driver-address-input" class="form-control" placeholder="Enter driver address" rows="2" required></textarea>
+          </div>
+
+          <div class="form-row-2col">
+            <div class="form-group">
+              <label class="form-label" for="driver-vehicle-select">Assigned Vehicle</label>
+              <select id="driver-vehicle-select" class="form-control">
+                <option value="">Unassigned</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="driver-status-select">Status</label>
+              <select id="driver-status-select" class="form-control" required>
+                <option value="Available">Available</option>
+                <option value="On Trip">On Trip</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+
+          <span id="driver-form-error" class="form-error"></span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('driver-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Driver</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Trip Modal (Assign & Edit) -->
+  <div id="trip-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <h3 id="trip-modal-title">Assign New Trip</h3>
+          <p id="trip-modal-subtitle">Assign vehicle and driver to transport goods.</p>
+        </div>
+        <button class="btn-close-modal" onclick="UI.closeModal('trip-modal')"><i data-lucide="x"></i></button>
+      </div>
+      <form id="trip-form">
+        <div class="modal-body">
+          <input type="hidden" id="trip-id-input">
+
+          <div class="form-row-2col">
+            <div class="form-group">
+              <label class="form-label" for="trip-source-input">Source Location</label>
+              <input type="text" id="trip-source-input" class="form-control" placeholder="e.g. Rajkot" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="trip-dest-input">Destination Location</label>
+              <input type="text" id="trip-dest-input" class="form-control" placeholder="e.g. Ahmedabad" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="trip-goods-input">Goods Description</label>
+            <input type="text" id="trip-goods-input" class="form-control" placeholder="e.g. Cement Bags, Machinery, Steel" required>
+          </div>
+
+          <div class="form-row-2col">
+            <div class="form-group">
+              <label class="form-label" for="trip-vehicle-select">Select Vehicle</label>
+              <select id="trip-vehicle-select" class="form-control" required>
+                <option value="">Select Available Vehicle</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="trip-driver-select">Select Driver</label>
+              <select id="trip-driver-select" class="form-control" required>
+                <option value="">Select Available Driver</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row-2col">
+            <div class="form-group">
+              <label class="form-label" for="trip-date-input">Scheduled Date</label>
+              <input type="date" id="trip-date-input" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="trip-status-select">Trip Status</label>
+              <select id="trip-status-select" class="form-control" required>
+                <option value="Scheduled">Scheduled</option>
+                <option value="In Transit">In Transit</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
+
+          <span id="trip-form-error" class="form-error"></span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('trip-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Assign Trip</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Reusable Detail Reader View Modal -->
+  <div id="view-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <h3 id="view-modal-title">Record Details</h3>
+        </div>
+        <button class="btn-close-modal" onclick="UI.closeModal('view-modal')"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body" id="view-detail-body">
+        <!-- Dynamic Detail Grid -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="UI.closeModal('view-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reusable Confirm / Alert Modal -->
+  <div id="confirm-modal" class="modal-overlay">
+    <div class="modal-card" style="max-width:440px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <h3 id="confirm-modal-title">Confirm Action</h3>
+        </div>
+        <button class="btn-close-modal" onclick="UI.closeModal('confirm-modal')"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-modal-message" class="text-secondary" style="font-size:0.95rem;line-height:1.5;">Are you sure?</p>
+      </div>
+      <div class="modal-footer">
+        <button id="confirm-modal-cancel-btn" type="button" class="btn btn-secondary" onclick="UI.closeModal('confirm-modal')">Cancel</button>
+        <button id="confirm-modal-action-btn" type="button" class="btn btn-danger" onclick="UI.handleConfirmAction()">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- JavaScript Application Modules -->
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/vehicles.js"></script>
+  <script src="js/drivers.js"></script>
+  <script src="js/trips.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
