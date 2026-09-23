@@ -4,6 +4,17 @@
    ========================================================================== */
 
 const Vehicles = {
+  // Escape user-supplied strings before injecting into innerHTML (XSS guard)
+  escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  },
+
   // Render Vehicles Table & Mobile Cards
   render() {
     const vehicles = Storage.getVehicles();
@@ -38,6 +49,9 @@ const Vehicles = {
       return matchesSearch && matchesStatus && matchesType;
     });
 
+    // Store last-filtered set so exportToCSV() can reuse it without re-filtering
+    this._lastFiltered = filtered;
+
     const tbody = document.getElementById('vehicles-table-body');
     const mobileContainer = document.getElementById('vehicles-mobile-cards');
     const emptyState = document.getElementById('vehicles-empty-state');
@@ -56,21 +70,21 @@ const Vehicles = {
     // Desktop Table HTML
     tbody.innerHTML = filtered.map(v => {
       const driver = driverMap[v.driverId];
-      const driverDisplay = driver ? driver.name : '<span class="text-muted">Unassigned</span>';
+      const driverDisplay = driver ? this.escapeHtml(driver.name) : '<span class="text-muted">Unassigned</span>';
       const badgeClass = this.getStatusBadgeClass(v.status);
 
       return `
         <tr>
           <td>
-            <span class="cell-primary-text">${v.vehicleNumber}</span>
-            <span class="cell-sub-text">${v.id}</span>
+            <span class="cell-primary-text">${this.escapeHtml(v.vehicleNumber)}</span>
+            <span class="cell-sub-text">${this.escapeHtml(v.id)}</span>
           </td>
-          <td>${v.type}</td>
-          <td>${v.capacity}</td>
+          <td>${this.escapeHtml(v.type)}</td>
+          <td>${this.escapeHtml(v.capacity)}</td>
           <td>${driverDisplay}</td>
           <td>
             <span class="badge ${badgeClass}">
-              <span class="badge-dot"></span>${v.status}
+              <span class="badge-dot"></span>${this.escapeHtml(v.status)}
             </span>
           </td>
           <td>
@@ -93,20 +107,20 @@ const Vehicles = {
     // Mobile Cards HTML
     mobileContainer.innerHTML = filtered.map(v => {
       const driver = driverMap[v.driverId];
-      const driverDisplay = driver ? driver.name : 'Unassigned';
+      const driverDisplay = driver ? this.escapeHtml(driver.name) : 'Unassigned';
       const badgeClass = this.getStatusBadgeClass(v.status);
 
       return `
         <div class="mobile-data-card">
           <div class="mobile-card-header">
             <div>
-              <span class="cell-primary-text">${v.vehicleNumber}</span>
-              <span class="cell-sub-text">${v.id} · ${v.type}</span>
+              <span class="cell-primary-text">${this.escapeHtml(v.vehicleNumber)}</span>
+              <span class="cell-sub-text">${this.escapeHtml(v.id)} · ${this.escapeHtml(v.type)}</span>
             </div>
-            <span class="badge ${badgeClass}">${v.status}</span>
+            <span class="badge ${badgeClass}">${this.escapeHtml(v.status)}</span>
           </div>
           <div class="mobile-card-body">
-            <div><strong>Capacity:</strong> ${v.capacity}</div>
+            <div><strong>Capacity:</strong> ${this.escapeHtml(v.capacity)}</div>
             <div><strong>Driver:</strong> ${driverDisplay}</div>
           </div>
           <div class="mobile-card-footer">
@@ -140,6 +154,9 @@ const Vehicles = {
     document.getElementById('vehicle-form').reset();
     document.getElementById('vehicle-id-input').value = '';
 
+    const errorBox = document.getElementById('vehicle-form-error');
+    if (errorBox) errorBox.innerText = '';
+
     this.populateDriverDropdown();
     UI.openModal('vehicle-modal');
   },
@@ -161,6 +178,20 @@ const Vehicles = {
         select.appendChild(option);
       }
     });
+  },
+
+  // Generate the next sequential vehicle ID based on the highest existing
+  // numeric suffix, rather than array length (which collides after deletes).
+  generateNextId(vehicles) {
+    let maxNum = 100; // so the first generated ID is VEH-101, matching prior behavior
+    vehicles.forEach(v => {
+      const match = /^VEH-(\d+)$/.exec(v.id || '');
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (num > maxNum) maxNum = num;
+      }
+    });
+    return 'VEH-' + String(maxNum + 1).padStart(3, '0');
   },
 
   // Save Vehicle (Register or Update)
@@ -219,7 +250,7 @@ const Vehicles = {
       }
     } else {
       // Create New Record
-      const newId = 'VEH-' + String(vehicles.length + 101).padStart(3, '0');
+      const newId = this.generateNextId(vehicles);
       const newVehicle = {
         id: newId,
         vehicleNumber: numberInput,
@@ -255,13 +286,13 @@ const Vehicles = {
 
     body.innerHTML = `
       <div class="detail-grid">
-        <div class="detail-item"><label>Vehicle ID</label><span>${v.id}</span></div>
-        <div class="detail-item"><label>Registration Number</label><span>${v.vehicleNumber}</span></div>
-        <div class="detail-item"><label>Vehicle Type</label><span>${v.type}</span></div>
-        <div class="detail-item"><label>Capacity</label><span>${v.capacity}</span></div>
-        <div class="detail-item"><label>Assigned Driver</label><span>${driver ? driver.name : 'Unassigned'}</span></div>
-        <div class="detail-item"><label>Current Status</label><span><span class="badge ${this.getStatusBadgeClass(v.status)}">${v.status}</span></span></div>
-        <div class="detail-item"><label>Registration Date</label><span>${v.registrationDate}</span></div>
+        <div class="detail-item"><label>Vehicle ID</label><span>${this.escapeHtml(v.id)}</span></div>
+        <div class="detail-item"><label>Registration Number</label><span>${this.escapeHtml(v.vehicleNumber)}</span></div>
+        <div class="detail-item"><label>Vehicle Type</label><span>${this.escapeHtml(v.type)}</span></div>
+        <div class="detail-item"><label>Capacity</label><span>${this.escapeHtml(v.capacity)}</span></div>
+        <div class="detail-item"><label>Assigned Driver</label><span>${driver ? this.escapeHtml(driver.name) : 'Unassigned'}</span></div>
+        <div class="detail-item"><label>Current Status</label><span><span class="badge ${this.getStatusBadgeClass(v.status)}">${this.escapeHtml(v.status)}</span></span></div>
+        <div class="detail-item"><label>Registration Date</label><span>${this.escapeHtml(v.registrationDate)}</span></div>
       </div>
     `;
 
@@ -282,6 +313,9 @@ const Vehicles = {
     document.getElementById('vehicle-type-select').value = v.type;
     document.getElementById('vehicle-capacity-select').value = v.capacity;
     document.getElementById('vehicle-status-select').value = v.status;
+
+    const errorBox = document.getElementById('vehicle-form-error');
+    if (errorBox) errorBox.innerText = '';
 
     this.populateDriverDropdown(v.driverId || '');
     UI.openModal('vehicle-modal');
@@ -322,5 +356,63 @@ const Vehicles = {
         Dashboard.render();
       }
     });
+  },
+
+  // ------------------------------------------------------------------------
+  // NEW FEATURE: Export the currently filtered vehicle list to CSV
+  // Wire this up with a button, e.g.:
+  //   <button onclick="Vehicles.exportToCSV()">Export CSV</button>
+  // ------------------------------------------------------------------------
+  exportToCSV() {
+    const vehicles = this._lastFiltered || Storage.getVehicles();
+    const drivers = Storage.getDrivers();
+    const driverMap = {};
+    drivers.forEach(d => { driverMap[d.id] = d; });
+
+    if (vehicles.length === 0) {
+      UI.showToast('No vehicles to export.', 'warning');
+      return;
+    }
+
+    const headers = ['Vehicle ID', 'Registration Number', 'Type', 'Capacity', 'Assigned Driver', 'Status', 'Registration Date'];
+
+    const csvEscape = (val) => {
+      const s = val === null || val === undefined ? '' : String(val);
+      if (/[",\n]/.test(s)) {
+        return '"' + s.replace(/"/g, '""') + '"';
+      }
+      return s;
+    };
+
+    const rows = vehicles.map(v => {
+      const driver = driverMap[v.driverId];
+      return [
+        v.id,
+        v.vehicleNumber,
+        v.type,
+        v.capacity,
+        driver ? driver.name : 'Unassigned',
+        v.status,
+        v.registrationDate || ''
+      ].map(csvEscape).join(',');
+    });
+
+    const csvContent = [headers.map(csvEscape).join(','), ...rows].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const dateStr = new Date().toISOString().split('T')[0];
+
+    link.href = url;
+    link.download = `vehicles-export-${dateStr}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    if (typeof UI !== 'undefined' && UI.showToast) {
+      UI.showToast(`Exported ${vehicles.length} vehicle(s) to CSV.`, 'success');
+    }
   }
 };
